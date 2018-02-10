@@ -2,6 +2,10 @@
 ############# FITTING MODELS ################
 
 
+
+# Instead of regressing on the percent of vote that went to one candidate, we can threshold the regression at 50% and do a classification problem.
+
+
 library(flexclust)
 library(MASS)
 library(ggplot2)

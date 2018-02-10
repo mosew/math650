@@ -2,6 +2,10 @@
 ############# FITTING MODELS ################
 
 
+# Fitting the logarithm of the number of votes for Bush.
+
+
+
 library(glmnet)
 library(glm2)
 library(MASS)
@@ -14,6 +18,8 @@ library(randomForest)
 
 # Load and prepare data
 source('C:/Users/mose/Dropbox/HW/math650/votes/2000/proj.R')
+
+
 
 
 

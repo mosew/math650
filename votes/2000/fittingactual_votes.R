@@ -1,3 +1,9 @@
+# FITTING VOTES
+
+
+# Ill-advised from the start, but one could also perform a regression on the actual NUMBER of votes per county given census data.
+
+
 library(glmnet)
 library(glm2)
 library(MASS)
@@ -10,6 +16,10 @@ library(randomForest)
 
 # Load and prepare data
 source('C:/Users/mose/Dropbox/HW/math650/votes/2000/proj.R')
+
+
+
+
 
 ################ POISSON ###################
 
