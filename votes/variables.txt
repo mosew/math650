@@ -1,0 +1,54 @@
+ELE035200D, 	percent voting Bush
+
+HEA620200D, nohealthinsurance
+HSG415200D, vehperhouse
+POP050200D,	flow10yr
+POP130200D	onfarms
+POP255200D	black1
+POP325200D	asian1
+POP385200D (other)	POP350200D (native hawaii/pacific islander)	POP285200D (american indian/native alaskan)
+POP390200D	multrace
+POP405200D	hispanic
+POP235200D	white1nh
+POP440200D + POP540200D nevermarried
+POP450200D + POP550200D married and not separated
+	+ POP470200D + POP570200D	widowed
+POP460200D + POP480200D + POP560200D + POP580200D separated and divorced
+POP815200D	non-english speaking at home
+POP645200D	foreignborn
+EDU380200D	incollege (count)
+EDU610200D	+ EDU620200D	lessthan9th+somehighschool
+EDU635200D	+ EDU640200D + EDU650200D HS, some college, Associates
+EDU685200D	>=bachelors
+LFE061200D	unemployedclf
+LFE620200D	manprofoccs
+LFE630200D	serviceoccs
+LFE640200D	salesoffoccs
+LFE650200D	farmfishoccs
+LFE660200D	consoccs
+LFE670200D	transoccs
+PIN020200D	pci
+IPE010200D	median household income
+IPE120200D	poverty
+HSG096200D	pct multi-dwelling structures
+HSG860200D	mediangrossrent
+HSG495200D	medianhvalue
+POP010200D	lnpop
+LND110200D	lnland
+POP060200D	lnpoppersqm
+POP110200D	urban
+HSD300200D	inhomes
+AGE320200D+AGE380200D age20to35
+AGE470200D+AGE570200D age35to55
+AGE640200D + AGE670200D + AGE760200D over55
+CRM110200D	vcper1000
+ELE010200D	voterparticip
+latitude
+longitude
+european
+asian
+latinamerican
+gwagegap
+houseaffordability (pci/medianhvalue)
+
+VET010200D	veteran (count)

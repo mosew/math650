@@ -1,0 +1,13 @@
+PCT136
+MEDIAN EARNINGS IN 1999 (DOLLARS) BY SEX FOR THE POPULATION 16 YEARS AND OVER WITH EARNINGS [3]
+
+Universe: Population 16 years and over with earnings
+
+NOTE: Data based on a sample. For information on confidentiality
+protection, sampling error, nonsampling error, definitions, and
+count corrections see
+http://www.census.gov/prod/cen2000/doc/sf4.pdf
+
+
+
+
