@@ -53,8 +53,8 @@ t$fips = paste(sprintf("%02d",t$Statecode),sprintf("%03d",t$COUNTYCODE),sep="")
 # Oglala Lakota County, SD
 # Loving, TX
 
-X=t[-unique(which(is.na(t),arr.ind=T)[,1]),]
-X=X[-which(X$medianhvalue==0,arr.ind=T),]
+t=t[-unique(which(is.na(t),arr.ind=T)[,1]),]
+X=t[-which(t$medianhvalue==0,arr.ind=T),]
 sum(is.na(X))
 # > 0
 
@@ -129,24 +129,39 @@ X = X[,-c(2,16)]
 
 X.noca = X %>%
   filter(state!="CA")%>%
-  mutate(state=NULL)
+  mutate(state=NULL,
+         rpct04=NULL,
+         rpct08=NULL)
 X.ca = X %>%
   filter(state=="CA") %>%
-  mutate(state=NULL)
+  mutate(state=NULL,
+         rpct04=NULL,
+         rpct08=NULL)
 
 X.nofl = X %>%
   filter(state!="FL")%>%
-  mutate(state=NULL)
+  mutate(state=NULL,
+         rpct04=NULL,
+         rpct08=NULL)
+
 X.fl = X %>%
   filter(state=="FL") %>%
-  mutate(state=NULL)
-X = mutate(X,state=NULL)
+  mutate(state=NULL,
+         rpct04=NULL,
+         rpct08=NULL)
+X = mutate(X,state=NULL,
+           rpct04=NULL,
+           rpct08=NULL)
 
 
 data("df_pop_county","df_pop_state")
 
 t$region=as.integer(t$fips)
 t=left_join(df_pop_county,t,by="region",all=F)
+t.fl = filter(t,state=="FL")
+t.ca = filter(t,state=="CA")
+t.nofl = filter(t,state!="FL")
+t.noca = filter(t,state!="CA")
 
 states=df_pop_state$region
 noak=states[-2] #Omit Alaska

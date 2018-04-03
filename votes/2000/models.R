@@ -52,16 +52,6 @@ b=b[b[,1]!=0,,drop=FALSE]
 b[order(-b[,1]),,drop=FALSE]
 
 
-######### GLMBOOST ##############
-
-set.seed(32323)
-glmboost.fit = train(rpct~., data=X,
-                      method="glmboost",
-                      trControl=lasso.control,
-                      preProcess=c("center","scale"),
-                      tuneGrid=expand.grid(mstop=seq(50,400,50),prune="yes"))
-
-
 ######### RANDOM FOREST ###########
 
 set.seed(32323)
@@ -85,14 +75,14 @@ rf.imp=varImp(rf.fit)$importance
 ######### STOCHASTIC GRADIENT BOOSTING / BOOSTED TREES ############
 
 set.seed(32323)
-gbm.fit = train(rpct~., data=X,
-                method="gbm",
-                trControl=tenfoldcv,
-                verbose=T,
-                tuneGrid=expand.grid(n.trees=400,
-                                     interaction.depth=6,
-                                     shrinkage=0.1,
-                                     n.minobsinnode=20))
+gbm.fit.ca = train(rpct~., data=X.noca,
+                  method="gbm",
+                  trControl=tenfoldcv,
+                  verbose=T,
+                  tuneGrid=expand.grid(n.trees=400,
+                                       interaction.depth=6,
+                                       shrinkage=0.1,
+                                       n.minobsinnode=20))
 
 gbm.fm=gbm.fit$finalModel
 gbm.imp=varImp(gbm.fit)$importance

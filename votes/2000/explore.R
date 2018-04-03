@@ -15,7 +15,6 @@ corrplot(cor(X),type="lower",order="hclust",cl.pos="b",tl.col="black",tl.srt=30,
 
 
 
-
 ### PLOT OF ACTUAL US ELECTION RESULTS
 
 
@@ -43,7 +42,7 @@ t$notwhiteorafam = 100-(t$white1nh + t$black1)/t$totpop.x*100
 q=cbind.data.frame(region=t$region,value=t$rpct)
 names(q)=c("region","value")
 county_choropleth(unique(q),num_colors=1,state_zoom=noak)+
-  labs(title = "Bush v. Gore, 2000",fill="% voting Bush") +
+  labs(fill="% voting Bush") +
   scale_fill_gradient2(low = "steelblue4", mid="white", midpoint=50, high = "red2", na.value="white") +
   theme_tufte()+
   theme(legend.position=c(.16,.2),legend.background = element_rect(color = "black",
@@ -64,7 +63,7 @@ county_choropleth(unique(q),num_colors=1,state_zoom=noak)+
 q.fl=cbind.data.frame(region=t.fl$region,value=t.fl$rpct)
 names(q)=c("region","value")
 county_choropleth(unique(q.fl),num_colors=0,state_zoom="florida")+
-  labs(title = "Bush v. Gore, 2000",fill="% voting Bush") +
+  labs(fill="% voting Bush") +
   theme_tufte()+
     theme(legend.position=c(0.2,0.2),legend.background = element_rect(color = "black", fill = "grey90", size = 1, linetype = "solid"))+
   scale_fill_gradient2(low = "steelblue4", mid="white", midpoint=50, high = "red2", na.value="white") +
@@ -87,7 +86,7 @@ names(q)=c("region","value")
 county_choropleth(unique(q.ca),num_colors=0,state_zoom="california")+
   labs(title = "Bush v. Gore, 2000",fill="% voting Bush") +
   theme_tufte()+
-  theme(legend.position=c(0.2,0.2),legend.background = element_rect(color = "black", fill = "grey90", size = 1, linetype = "solid"))+
+  theme(legend.position=c(0.8,0.8),legend.background = element_rect(color = "black", fill = "grey90", size = 0, linetype = "solid"))+
   scale_fill_gradient2(low = "steelblue4", mid="white", midpoint=50, high = "red2", na.value="white") +
   theme(panel.background = element_rect(fill = 'white', colour = 'black'))+
   scale_color_ptol()+
