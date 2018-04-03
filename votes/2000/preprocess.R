@@ -4,7 +4,7 @@ library(plyr)
 library(dplyr)
 library(magrittr)
 library(scales)
-
+library(openxlsx)
 
 
 # numeric data in the spreadsheet are read in as character data; this function will fix that
@@ -14,9 +14,11 @@ tonumeric=function(y){
   return(cbind(y[,!numeric_columns],c2[,numeric_columns]))
 }
 
+  
+
 # Load census data.
 # Limitation: based on sample data
-full=read.csv("raw/csv/full.csv",header=T,stringsAsFactors = F,strip.white=T)[-c(1,2),] %>%
+full=read.csv("raw/csv/full2.csv",header=T,stringsAsFactors = F,strip.white=T)[-c(1,2),] %>%
   
   # drop rows with empty county names, which give statewide or USA totals
   filter(countystate!=toupper(countystate)) %>%
@@ -36,13 +38,14 @@ latlong=read.csv("raw/csv/latlong.csv",header=T,stringsAsFactors = F,strip.white
   mutate(county = tolower(gsub("( Parish)|( city)|( City)|( County)|(')| ","",county)))
 
 t=merge(tonumeric(full),tonumeric(latlong),by=c("state","county"),all=T)
-t$fips = paste(sprintf("%02d",t$Statecode),sprintf("%03d",t$COUNTYCODE),sep="")
 
 
 # For some reason Virginia is missing per capita income data, so I set each county's equal to the statewide avg
 t$pci[t$state=="VA"]=23975
+t$fips = paste(sprintf("%02d",t$Statecode),sprintf("%03d",t$COUNTYCODE),sep="")
 
-# Manually delete some (small) counties missing information
+
+# Some (small) counties missing information
 
 # Kalawao, HI
 # Broomfield, CO
@@ -50,82 +53,103 @@ t$pci[t$state=="VA"]=23975
 # Oglala Lakota County, SD
 # Loving, TX
 
-#t$county[unique(which(is.na(t),arr.ind=T)[,1])]
 X=t[-unique(which(is.na(t),arr.ind=T)[,1]),]
 X=X[-which(X$medianhvalue==0,arr.ind=T),]
 sum(is.na(X))
 # > 0
 
-# Get target
-y = data.frame(rpct=X$rpct)
 
-# Drop non-numeric and target columns
-X = X[,-c(1,2,3,4,5,18,60,61,62,65,67)]
+topct = 100/X$totpop.x
 
-X$pop=X$totpop.x
-X$other1 = X$other1+X$pacisl1+X$native1
-X$nevermarried = (X$fnevermarried+X$mnevermarried)/X$pop*100
-X$married = (X$fmarriednonsep+X$mmarriednonsep)/X$pop*100
-X$sepdiv = (X$fseparated+X$fdivorced+X$mdivorced+X$mseparated)/X$pop*100
-X$lnpop = as.numeric(log(X$pop))
-X$lnpoppersqmi = as.numeric(log(X$poppersqmi))
-X$age20_34 = (X$age20_24+X$age25_34)/X$pop*100
-X$age35_54 = (X$age35_44+X$age45_54)/X$pop*100
-X$age55_ov = (X$age55_59+X$age60_64+X$age65ov)/X$pop*100
-X$vcper1000 = X$vc/X$pop*1000
-X$homeaffordability = X$pci/X$medianhvalue*100
-X$homeless = (X$totpop.x-X$inhomes)/X$pop*100
-X$nohealthinsurance = X$nohealthinsurance/X$pop*100
-X$urban = X$urbanpop/X$pop*100
-X$farm = X$farmpop/X$pop*100
-X$voterparticip = X$totvotes/X$pop*100
-X$profoccs = X$profoccs/X$pop*100
-X$farmoccs = X$farmoccs/X$pop*100
-X$constructionoccs = X$constructionoccs/X$pop*100
-X$salesoccs = X$salesoccs/X$pop*100
-X$productionoccs = X$productionoccs/X$pop*100
-X$serviceoccs = X$serviceoccs/X$pop*100
-X$incollege = X$incollege/X$pop*100
-X$houseperpop = X$tothous/X$pop
+X = X %>%
+  mutate(pop=totpop.x,
+         other1=other1+pacisl1+native1,
+         nevermarried=(fnevermarried+mnevermarried)*topct,
+         married=(fmarriednonsep+mmarriednonsep)*topct,
+         sepdiv=(fseparated+fdivorced+mdivorced+mseparated)*topct,
+         logpop=as.numeric(log(pop)),
+         logpoppersqmi=as.numeric(log(poppersqmi)),
+         age20_34=(age20_24+age25_34)*topct,
+         age35_54=(age35_44+age45_54)*topct,
+         age55_ov=(age55_59+age60_64+age65ov)*topct,
+         vcperpop=vc/pop,
+         homeaffordability=pci/medianhvalue*100,
+         homeless=(pop-inhomes)*topct,
+         nohealthinsurance=nohealthinsurance*topct,
+         urban=urbanpop*topct,
+         farm=farmpop*topct,
+         voterparticip=totvotes*topct,
+         bluecollaroccs=(farmoccs+constructionoccs+productionoccs)*topct,
+         incollege=incollege*topct,
+         houseperpop=tothous/pop)
+
+X$bluecollaroccs[X$region==1011]=mean(X$bluecollaroccs[X$state=="AL"])
 X$long[X$long>0]=X$long[X$long>0]-180
-
 fips = X$fips
-X=subset(X,select=-c(pacisl1,native1,fnevermarried,mnevermarried,fmarriednonsep,mmarriednonsep,mwidowed,fwidowed,
-                     fseparated,fdivorced,mseparated,mdivorced,poppersqmi,totpop.x,pop,totvotes,tothous,
-                     age20_24,age25_34,age35_44,age45_54,age55_59,age60_64,age65ov,vc,inhomes,landsqm,
-                     urbanpop,farmpop,fips))
-
 
 
 # Look for heavy tails (and heads) and deal with them
 
 # First identify non-normal distributions by the Shapiro-Wilk test
-shapiro.score=X%>%
-  apply(2,shapiro.test)%>%
-  sapply(function(x) x[[1]][[1]])
+#shapiro.score=X%>%
+#  apply(2,shapiro.test)%>%
+#  sapply(function(x) x[[1]][[1]])
 
-abnormvars=names(X)[shapiro.score<.92]
+#abnormvars=names(X)[shapiro.score<.92]
 
-X$lnincollege = as.numeric(log(X$incollege))
-X$lnba = as.numeric(log(X$ba))
-X$lnpctmultiunitdwelling = as.numeric(log(X$pctmultiunitdwelling))
-X$lnpctmultiunitdwelling[X$pctmultiunitdwelling==0]=min(X$lnpctmultiunitdwelling[X$lnpctmultiunitdwelling>-Inf])
-X$lnmedianhvalue = as.numeric(log(X$medianhvalue))
-X$lnmediangrossrent = as.numeric(log(X$mediangrossrent))
-X$medianhhincome[X$medianhhincome==0]=min(X$medianhhincome[X$medianhhincome>0])
-X$lnmedianhhincome = as.numeric(log(X$medianhhincome))
-X$lnunemployed = as.numeric(log(X$unemployed+.1))
-X$lnpci = as.numeric(log(X$pci))
-X$lnforeignborn = as.numeric(log(X$foreignborn+.1))
-X$lnnonenglish = as.numeric(log(X$esl+.1))
-X$lnlandsqmi = as.numeric(log(X$landsqmi))
-#X$lnvcper1000 = as.numeric(log(X$vcper1000))
-X$lnhomeless = as.numeric(log(X$homeless+.1))
-#X$lnhouseperpop = as.numeric(log(X$houseperpop))
+X$medianhhincome[X$medianhhincome==0]=median(X$medianhhincome[X$medianhhincome>0])
+X$pci[X$pci==0]=median(X$pci)
 
-X = subset(X,select=-c(ba,medianhvalue,mediangrossrent,landsqmi,incollege,pctmultiunitdwelling,medianhhincome,unemployed,pci,foreignborn,esl,homeless))
+X = X %>%
+  mutate(logincollege=as.numeric(log(incollege)),
+         logba=log(ba),
+         logpctmultiunitdwelling=as.numeric(pctmultiunitdwelling),
+         logmedianhvalue=as.numeric(log(medianhvalue)),
+         logmediangrossrent=as.numeric(log(mediangrossrent)),
+         logunemployed=as.numeric(log(unemployed+.1)),
+         logpci=as.numeric(log(pci)),
+         logforeignborn=as.numeric(log(foreignborn+.1)),
+         lognonenglish=as.numeric(log(esl+.1)),
+         loglandsqmi=as.numeric(log(landsqmi)),
+         loghomeless=as.numeric(log(homeless+.1))
+         )
 
-y.2 = factor(y>50,levels=c(TRUE,FALSE),labels=c("Bush","Gore"))
-X.2 = X
-X.2$rpct = y.2
-X = cbind.data.frame(y,X)
+
+X = subset(X,select=-c(pacisl1,native1,fnevermarried,mnevermarried,fmarriednonsep,mmarriednonsep,mwidowed,fwidowed,
+                     fseparated,fdivorced,mseparated,mdivorced,poppersqmi,totpop.x,pop,totvotes,tothous,
+                     age20_24,age25_34,age35_44,age45_54,age55_59,age60_64,age65ov,vc,inhomes,landsqm,
+                     urbanpop,farmpop,fips))
+X = subset(X,select=-c(ba,medianhvalue,mediangrossrent,landsqmi,incollege,pctmultiunitdwelling,medianhhincome,unemployed,
+                       foreignborn,esl,homeless,watersqm,watersqmi,pci,black1,
+                       county,Statecode,COUNTYCODE,totpop.y,statecode,
+                       farmoccs,profoccs,serviceoccs,salesoccs,constructionoccs,productionoccs))
+
+# Removes two columns with weird names
+X = X[,-c(2,16)]
+
+X.noca = X %>%
+  filter(state!="CA")%>%
+  mutate(state=NULL)
+X.ca = X %>%
+  filter(state=="CA") %>%
+  mutate(state=NULL)
+
+X.nofl = X %>%
+  filter(state!="FL")%>%
+  mutate(state=NULL)
+X.fl = X %>%
+  filter(state=="FL") %>%
+  mutate(state=NULL)
+X = mutate(X,state=NULL)
+
+
+data("df_pop_county","df_pop_state")
+
+t$region=as.integer(t$fips)
+t=left_join(df_pop_county,t,by="region",all=F)
+
+states=df_pop_state$region
+noak=states[-2] #Omit Alaska
+
+
+
