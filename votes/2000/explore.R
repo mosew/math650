@@ -10,8 +10,21 @@ library(ggthemes)
 
 source('C:/Users/mose/Dropbox/math650/votes/2000/preprocess.R')
 
+data("df_pop_county","df_pop_state")
+
+t$region=as.integer(t$fips)
+t=left_join(df_pop_county,t,by="region",all=F)
+t.fl = filter(t,state=="FL")
+t.ca = filter(t,state=="CA")
+t.nofl = filter(t,state!="FL")
+t.noca = filter(t,state!="CA")
+
+states=df_pop_state$region
+noak=states[-2] #Omit Alaska
+
+
 ### CORRELATION PLOT
-corrplot(cor(X),type="lower",order="hclust",cl.pos="b",tl.col="black",tl.srt=30,tl.cex = 0.9)
+corrplot(cor(subset(X,select= -rpct)),type="lower",order="hclust",cl.pos="b",tl.col="black",tl.srt=30,tl.cex = 0.9)
 
 
 

@@ -152,19 +152,3 @@ X.fl = X %>%
 X = mutate(X,state=NULL,
            rpct04=NULL,
            rpct08=NULL)
-
-
-data("df_pop_county","df_pop_state")
-
-t$region=as.integer(t$fips)
-t=left_join(df_pop_county,t,by="region",all=F)
-t.fl = filter(t,state=="FL")
-t.ca = filter(t,state=="CA")
-t.nofl = filter(t,state!="FL")
-t.noca = filter(t,state!="CA")
-
-states=df_pop_state$region
-noak=states[-2] #Omit Alaska
-
-
-

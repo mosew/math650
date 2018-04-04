@@ -59,9 +59,8 @@ rf.fit=train(rpct ~ ., data=X,
              method="rf",
              importance=T,
              verbose=F,
-             ntree=500,
              trControl=tenfoldcv,
-             tuneGrid=data.frame(mtry=25),
+             #tuneGrid=data.frame(mtry=25),
              allowParallel=T,
              do.trace=100)
 
@@ -70,21 +69,52 @@ rf.fm=rf.fit$finalModel
 rf.imp=varImp(rf.fit)$importance
 
 
-
-
-######### STOCHASTIC GRADIENT BOOSTING / BOOSTED TREES ############
+############ STOCHASTIC GRADIENT BOOSTING #############
 
 set.seed(32323)
 gbm.fit.ca = train(rpct~., data=X.noca,
-                  method="gbm",
-                  trControl=tenfoldcv,
-                  verbose=T,
-                  tuneGrid=expand.grid(n.trees=400,
-                                       interaction.depth=6,
-                                       shrinkage=0.1,
-                                       n.minobsinnode=20))
+                   method="gbm",
+                   trControl=tenfoldcv,
+                   verbose=T,
+                   tuneGrid=expand.grid(n.trees=400,
+                                        interaction.depth=6,
+                                        shrinkage=0.1,
+                                        n.minobsinnode=20))
 
 gbm.fm=gbm.fit$finalModel
 gbm.imp=varImp(gbm.fit)$importance
 
+
+
+
+############### SVM (LINEAR) ###################
+
+set.seed(32323)
+svm.fit = train(rpct~., data=X,
+                method="svmLinear",
+                trControl=tenfoldcv,
+                preProc = c("center","scale"),
+                tuneGrid=expand.grid(C=c(0.1,1,2)))
+
+svm.fm=svm.fit$finalModel
+svm.imp=varImp(svm.fit)$importance
+
+
+############### CART ###################
+
+set.seed(32323)
+cart.fit = train(rpct~., data=X,
+                 method="rpart",
+                 trControl=tenfoldcv)
+cart.fm=svm2.fit$finalModel
+cart.imp=varImp(svm2.fit)$importance
+
+############### CART ###################
+
+set.seed(32323)
+knn.fit = train(rpct~., data=X,
+                 method="kknn",
+                 trControl=tenfoldcv)
+knn.fm=knn.fit$finalModel
+knn.imp=varImp(knn.fit)$importance
 
