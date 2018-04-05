@@ -72,14 +72,14 @@ rf.imp=varImp(rf.fit)$importance
 ############ STOCHASTIC GRADIENT BOOSTING #############
 
 set.seed(32323)
-gbm.fit.ca = train(rpct~., data=X.noca,
+gbm.fit = train(rpct~., data=X,
                    method="gbm",
                    trControl=tenfoldcv,
-                   verbose=T,
-                   tuneGrid=expand.grid(n.trees=400,
+                   verbose=F,
+                   tuneGrid=expand.grid(n.trees=c(400,450,500),
                                         interaction.depth=6,
                                         shrinkage=0.1,
-                                        n.minobsinnode=20))
+                                        n.minobsinnode=c(10,20)))
 
 gbm.fm=gbm.fit$finalModel
 gbm.imp=varImp(gbm.fit)$importance
